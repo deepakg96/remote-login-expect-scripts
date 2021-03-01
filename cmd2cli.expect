@@ -1,0 +1,50 @@
+#!/usr/bin/expect -f
+
+set timeout 25
+set argcount [llength $argv]
+if { $argcount < 3 } {
+    puts "Usage: ./cmd2cli sbc_ip <set/get> command_to_send"
+    exit
+}
+
+set server [lindex $argv 0]
+set command_type [lindex $argv 1]
+set cmd [lindex $argv 2]
+set user admin 
+set old_pass admin
+set pass Sonus@123
+
+if { $command_type == "set" } {
+set pre_str "configure"
+set post_str "commit"
+} else {
+set pre_str ""
+set post_str ""
+}
+
+
+spawn ssh -o StrictHostKeyChecking=no admin@$server 
+expect "*?assword" { 
+send "$pass\r" 
+}
+expect {
+"password:" {
+send "$old_pass\r"
+expect "Enter old password:" {
+send "$old_pass\r"
+}
+expect "Enter new password: " {
+send "$pass\r"
+}
+expect "Re-enter new password: " {
+send "$pass\r"
+}
+expect ">" {
+send "$pre_str\r $cmd\r $post_str\r quit\r exit\r"
+}
+}
+">" {
+send "$pre_str\r $cmd\r $post_str\r quit\r exit\r"
+}
+} 
+interact

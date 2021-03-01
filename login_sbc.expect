@@ -1,0 +1,20 @@
+#!/usr/bin/expect -f
+
+set timeout 25
+set argcount [llength $argv]
+if { $argcount < 2 } {
+    puts "Usage: ./login_sbc.expect sbc_ip command_to_send"
+    exit
+}
+
+set server [lindex $argv 0]
+set cmd [lindex $argv 1]
+set user root
+set pass sonus1
+
+spawn ssh -o StrictHostKeyChecking=no root@$server -p 2024 "$cmd"
+
+expect "*?assword" {
+    send "$pass\r"
+}
+interact 
